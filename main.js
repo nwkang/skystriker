@@ -17,21 +17,38 @@ const powerupLabel = document.getElementById("powerup-label");
 const powerupBar = document.getElementById("powerup-bar");
 const lastScoreEl = document.getElementById("last-score");
 const modelStatusEl = document.getElementById("model-status");
+const gameRoot = document.getElementById("game-root");
+
+const isDesktop = window.matchMedia("(pointer: fine)").matches;
+if (isDesktop) {
+  document.body.classList.add("force-portrait");
+}
+
+function getGameSize() {
+  if (!gameRoot) {
+    return { width: window.innerWidth, height: window.innerHeight };
+  }
+  const rect = gameRoot.getBoundingClientRect();
+  const width = Math.max(1, Math.round(rect.width)) || window.innerWidth;
+  const height = Math.max(1, Math.round(rect.height)) || window.innerHeight;
+  return { width, height };
+}
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.1;
 renderer.physicallyCorrectLights = true;
-renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+const initialSize = getGameSize();
+renderer.setSize(initialSize.width, initialSize.height, false);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x0b1220, 25, 140);
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 220);
+const camera = new THREE.PerspectiveCamera(60, initialSize.width / initialSize.height, 0.1, 220);
 
 const State = {
   TITLE: "title",
@@ -405,14 +422,19 @@ startBtn.addEventListener("click", startGame);
 
 // --- Orientation / Resize -------------------------------------------------
 function updateOrientation() {
+  if (isDesktop) {
+    rotateOverlay.classList.add("hidden");
+    return;
+  }
   const portrait = window.innerHeight >= window.innerWidth;
   rotateOverlay.classList.toggle("hidden", portrait);
 }
 
 function onResize() {
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  const { width, height } = getGameSize();
   renderer.setPixelRatio(window.devicePixelRatio);
-  camera.aspect = window.innerWidth / window.innerHeight;
+  renderer.setSize(width, height, false);
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
   updateJoyRadius();
   updateOrientation();
@@ -1701,5 +1723,5 @@ function updateBullets(dt) {
   }
 }
 
-updateOrientation();
+onResize();
 animate(lastTime);
