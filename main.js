@@ -1012,7 +1012,7 @@ function applyObjToPlayer(obj) {
   if (size.x >= size.y && size.x >= size.z) {
     obj.rotation.y = -Math.PI / 2;
   } else if (size.y >= size.x && size.y >= size.z) {
-    obj.rotation.x = -Math.PI / 2;
+    obj.rotation.set(-Math.PI / 2, 0, Math.PI / 2);
   }
 
   box.setFromObject(obj);
@@ -1472,68 +1472,49 @@ function spawnEnemy(preset) {
 }
 
 // --- Obstacles & Powerups -------------------------------------------------
-const obstacleGeoSpike = new THREE.OctahedronGeometry(1.2, 0);
-const obstacleGeoTower = new THREE.CylinderGeometry(0.5, 1.2, 5, 6);
-const obstacleMatSpike = new THREE.MeshStandardMaterial({
+const obstacleGeo = new THREE.SphereGeometry(1.0, 12, 12);
+const obstacleMat = new THREE.MeshStandardMaterial({
   color: 0xff2222,
   roughness: 0.3,
   metalness: 0.4,
-  emissive: 0x660000,
-  emissiveIntensity: 0.6,
-});
-const obstacleMatTower = new THREE.MeshStandardMaterial({
-  color: 0x992222,
-  roughness: 0.5,
-  metalness: 0.3,
-  emissive: 0x440000,
-  emissiveIntensity: 0.4,
+  emissive: 0x880000,
+  emissiveIntensity: 0.7,
 });
 
 const obstaclePool = makePool(() => {
-  const mesh = new THREE.Mesh(obstacleGeoSpike, obstacleMatSpike);
+  const mesh = new THREE.Mesh(obstacleGeo, obstacleMat);
   mesh.castShadow = true;
   return mesh;
 }, 6);
 const obstacles = [];
 
-const powerupGeo = new THREE.SphereGeometry(0.6, 16, 16);
+const powerupGeo = new THREE.OctahedronGeometry(0.7, 0);
 const powerupMat = new THREE.MeshStandardMaterial({
-  color: 0x55ffaa,
-  roughness: 0.15,
-  metalness: 0.7,
-  emissive: 0x22ff88,
-  emissiveIntensity: 0.8,
+  color: 0xb9f2ff,
+  roughness: 0.08,
+  metalness: 0.9,
+  emissive: 0x55ccff,
+  emissiveIntensity: 0.7,
 });
 const powerupPool = makePool(() => {
   const group = new THREE.Group();
   const mesh = new THREE.Mesh(powerupGeo, powerupMat.clone());
   mesh.castShadow = true;
   group.add(mesh);
-  const glow = new THREE.PointLight(0x55ffaa, 1.5, 8);
+  const glow = new THREE.PointLight(0xb9f2ff, 1.5, 8);
   glow.position.set(0, 0, 0);
   group.add(glow);
   return group;
 }, 6);
 const powerUps = [];
 
-const powerupTypes = [
-  { type: "dual", color: 0x8bff8b, duration: 10 },
-  { type: "spread", color: 0xffd36b, duration: 10 },
-  { type: "laser", color: 0x9b7bff, duration: 8 },
-  { type: "rocket", color: 0xff9aa2, duration: 10 },
-  { type: "heal", color: 0x6bffb7, duration: 0, heal: 25 },
-];
-
 function spawnObstacle() {
-  const useSpike = Math.random() < 0.6;
   const o = obstaclePool.acquire();
-  o.geometry = useSpike ? obstacleGeoSpike : obstacleGeoTower;
-  o.material = useSpike ? obstacleMatSpike : obstacleMatTower;
   const x = (Math.random() - 0.5) * railBounds.x * 2;
   const z = 70 + Math.random() * 30;
   const altitude = 2 + Math.random() * 3;
   o.position.set(x, groundHeightAt(x, z) + altitude, z);
-  o.userData.radius = useSpike ? 1.4 : 1.2;
+  o.userData.radius = 1.2;
   o.userData.damage = 25;
   o.userData.spin = (Math.random() - 0.5) * 2.2;
   scene.add(o);
@@ -1541,24 +1522,14 @@ function spawnObstacle() {
 }
 
 function spawnPowerUp() {
-  const def = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
   const p = powerupPool.acquire();
-  const mesh = p.children[0];
-  if (mesh && mesh.material) {
-    mesh.material.color.setHex(def.color);
-    mesh.material.emissive.setHex(def.color);
-  }
-  const light = p.children[1];
-  if (light && light.isLight) {
-    light.color.setHex(def.color);
-  }
   const x = (Math.random() - 0.5) * railBounds.x * 2;
   const z = 70 + Math.random() * 30;
   const altitude = 3 + Math.random() * 3;
   p.position.set(x, groundHeightAt(x, z) + altitude, z);
-  p.userData.type = def.type;
-  p.userData.duration = def.duration;
-  p.userData.heal = def.heal || 0;
+  p.userData.type = "heal";
+  p.userData.duration = 0;
+  p.userData.heal = 20;
   p.userData.spin = 0.6 + Math.random() * 0.8;
   scene.add(p);
   powerUps.push(p);
