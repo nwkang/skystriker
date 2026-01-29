@@ -185,9 +185,10 @@ function checkHits() {
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
     if (!e.userData.active) continue;
+    if (e.position.z < player.position.z) continue;
     for (let j = playerBullets.length - 1; j >= 0; j--) {
       const b = playerBullets[j];
-      if (e.position.distanceTo(b.position) < e.userData.hitRadius + 0.4) {
+      if (e.position.distanceTo(b.position) < e.userData.hitRadius + 0.7) {
         e.userData.hp -= b.userData.damage;
         bulletPool.release(b);
         playerBullets.splice(j, 1);
@@ -1181,8 +1182,8 @@ const fireRateBase = 10;
 let fireCooldown = 1 / (fireRateBase * diffMult.fireRate);
 let fireTimer = 0;
 
-const aimAssistStrength = 0.35;
-const aimConeDot = Math.cos(THREE.MathUtils.degToRad(15));
+const aimAssistStrength = 0.55;
+const aimConeDot = Math.cos(THREE.MathUtils.degToRad(25));
 
 const tempVecA = new THREE.Vector3();
 const tempVecB = new THREE.Vector3();
@@ -1270,7 +1271,7 @@ const enemyPresets = [
     class: "FIGHTER",
     hp: 20,
     speed: 18,
-    hitRadius: 0.9,
+    hitRadius: 1.4,
     scoreValue: 100,
     move: "ZIGZAG",
     fire: "SINGLE",
@@ -1299,7 +1300,7 @@ const enemyPresets = [
     class: "FIGHTER",
     hp: 28,
     speed: 20,
-    hitRadius: 0.95,
+    hitRadius: 1.45,
     scoreValue: 160,
     move: "ZIGZAG",
     fire: "BURST",
@@ -1328,7 +1329,7 @@ const enemyPresets = [
     class: "MEDIUM",
     hp: 50,
     speed: 12,
-    hitRadius: 1.3,
+    hitRadius: 1.8,
     scoreValue: 260,
     move: "SINE",
     fire: "SPREAD",
@@ -1357,7 +1358,7 @@ const enemyPresets = [
     class: "ELITE",
     hp: 75,
     speed: 22,
-    hitRadius: 1.0,
+    hitRadius: 1.5,
     scoreValue: 620,
     move: "SINE",
     fire: "BURST",
@@ -1388,7 +1389,7 @@ const bossPreset = {
   class: "BOSS",
   hp: 420,
   speed: 6,
-  hitRadius: 2.4,
+  hitRadius: 3.2,
   scoreValue: 5000,
   move: "BOSS",
   fire: "BOSS",
