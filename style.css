@@ -133,6 +133,12 @@ body {
   letter-spacing: 1px;
 }
 
+.panel button:disabled {
+  background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
 #home-btn {
   display: inline-flex;
   align-items: center;
