@@ -1012,7 +1012,7 @@ function applyObjToPlayer(obj) {
   if (size.x >= size.y && size.x >= size.z) {
     obj.rotation.y = -Math.PI / 2;
   } else if (size.y >= size.x && size.y >= size.z) {
-    obj.rotation.set(-Math.PI / 2, 0, Math.PI / 2);
+    obj.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
   }
 
   box.setFromObject(obj);
